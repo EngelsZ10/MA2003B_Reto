@@ -1,0 +1,15 @@
+---
+title: "Reto"
+author: "Engels Emiliano Miranda Palacios A01423398"
+date: "2023-11-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+```
+
