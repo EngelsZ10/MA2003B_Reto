@@ -10,6 +10,86 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+datos <- read.csv("limpios.csv")
+head(datos)
+```
+
+
+```{r}
+library(nortest)
+ad.test(datos$NO[1:1000])$p
+```
+
+```{r}
+normTest <- function(values) {
+  p <- c()
+  steps = 500
+  for (i in seq(1, length(values), by=steps)){
+    p=c(p, jarque.test(values[i:(i+steps)])$p)
+  }
+  return (p)
+}
+
+boxtrans <- function(datos, l){
+  return((datos^l -1)/l )
+}
 
 ```
+
+```{r}
+ad.test(datos$NO)
+```
+```{r}
+X1 <- boxtrans(datos$NO, l)
+```
+
+```{r}
+(normTest(X1))
+```
+
+
+```{r}
+M1 = datos$NO
+library(VGAM)
+lp <- seq(0,1,0.001) # Valores de lambda propuestos
+nlp <- length(lp)
+n=length(M1)
+D <- matrix(as.numeric(NA),ncol=2,nrow=nlp)
+d <-NA
+for (i in 1:nlp){
+d= yeo.johnson(M1, lambda = lp[i])
+p=ad.test(d)
+D[i,]=c(lp[i],p$p.value)}
+```
+
+```{r}
+N=as.data.frame(D)
+plot(N$Lambda, N$`Valor-p`, type="l",col="darkred",lwd=3, xlab="Lambda", ylab="Valor p (Normalidad)", )
+```
+
+
+```{r}
+library(moments)
+jarque.test(datos$NO)
+```
+
+
+```{r}
+hist(X1)
+```
+```{r}
+hist(datos$NO)
+```
+
+```{r}
+d = boxcox(datos$NO~1, lambda = l)
+```
+
+```{r}
+library(MASS)
+bc <- boxcox(datos$NO~1)
+l = bc$x[which.max(bc$y)]
+l
+```
+
 
