@@ -23,7 +23,7 @@ head(datos)
 
 
 ```{r}
-cols = c("TOUT", "RH", "SR", "NOPPM", "NO2PPM", "NOXPPM", "SO2PPM")
+`cols = c("TOUT", "RH", "SR", "NOPPM", "NO2PPM", "NOXPPM", "SO2PPM")
 color = c(CA='blue', GA = 'green', SA = 'orange')
 col.ind = color[datos$zona]
 plot(datos[cols],pch=21,bg=col.ind, col='gray')

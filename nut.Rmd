@@ -1,0 +1,107 @@
+---
+title: "Nut"
+author: "Engels Emiliano Miranda Palacios A01423398"
+date: "2023-11-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Importar librerias
+```{r, echo=FALSE}
+library(MASS)
+library(ggplot2)
+library(MVN)
+library(lmtest)
+```
+
+## Leer datos
+```{r}
+datos <- read.csv("datosConsolidados.csv")
+head(datos)
+```
+
+
+## Función de graficación
+```{r}
+tuk_plot <- function (x, xlab, ylab, ylabels = NULL, ...) {
+  for (i in seq_along(x)) {
+    xi <- x[[i]][, -4L, drop = FALSE]
+    yvals <- nrow(xi):1L
+    dev.hold()
+    on.exit(dev.flush())
+    plot(c(xi[, "lwr"], xi[, "upr"]), rep.int(yvals, 2L), 
+         type = "n", axes = FALSE, xlab = "", ylab = "", main = NULL, 
+         ...)
+    axis(1, ...)
+    # change for custom axis labels
+    if (is.null(ylabels)) ylabels <- dimnames(xi)[[1L]]
+
+    axis(2, at = nrow(xi):1, labels = ylabels, 
+         srt = 0, ...)
+    abline(h = yvals, lty = 1, lwd = 0.5, col = "lightgray")
+    abline(v = 0, lty = 2, lwd = 0.5, ...)
+    segments(xi[, "lwr"], yvals, xi[, "upr"], yvals, ...)
+    segments(as.vector(xi), rep.int(yvals - 0.1, 3L), as.vector(xi), 
+             rep.int(yvals + 0.1, 3L), ...)
+    title(main = paste0(format(100 * attr(x, "conf.level"), 
+                               digits = 2L), "% family-wise confidence level\n"), 
+          # change for custom axis titles
+          xlab = xlab, ylab = ylab)
+
+    box()
+    dev.flush()
+    on.exit()
+  }
+}
+```
+
+## Calcula ANOVA entre estacion y humedad realtiva
+```{r}
+anova <- aov(datos$RH ~ datos$zona, data = datos)
+print(summary(anova))
+```
+
+## Analisis Tukey para intervalo de confianza de la diferencia de medias entre grupos para humedad relativa
+```{r}
+TukeyHSD(anova)
+tuk_plot(TukeyHSD(anova), "Diferencias en los niveles de promedios de Humedad Relativa", "Pares de Estaciones")
+```
+### Prueba de independencia
+
+$H_0:$ Los errores no tienen autocorrelación de primer orden
+
+$H_1:$ Los errores tienen autocorrelación de primer orden
+
+```{r}
+dwtest(anova)
+```
+
+
+
+## Calcula ANOVA entre estacion y SO2
+```{r}
+anova <- aov(datos$SO2 ~ datos$zona, data = datos)
+print(summary(anova))
+```
+
+## Analisis Tukey para intervalo de confianza de la diferencia de medias entre grupos para SO2
+```{r}
+TukeyHSD(anova)
+tuk_plot(TukeyHSD(anova), "Diferencias en los niveles de promedios de SO2", "Pares de Estaciones")
+```
+
+### Prueba de independencia
+
+$H_0:$ Los errores no tienen autocorrelación de primer orden
+
+$H_1:$ Los errores tienen autocorrelación de primer orden
+
+```{r}
+dwtest(anova)
+```
+
+
+

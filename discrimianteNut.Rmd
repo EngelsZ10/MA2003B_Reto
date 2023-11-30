@@ -1,0 +1,163 @@
+---
+title: "DiscriminantesNut"
+author: "Engels Emiliano Miranda Palacios A01423398"
+date: "2023-11-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(MASS)
+library(ggplot2)
+library(MVN)
+```
+
+
+## Leer Datos
+
+```{r}
+datos <- read.csv("datosConsolidados.csv")
+head(datos)
+```
+## Separamos las estaciones de Cadereyta y Guadalupe
+
+```{r}
+datos = datos[datos$zona!="SA",]
+datos
+cols = c("NOPPM", "NO2PPM", "NOXPPM", "SO2PPM", "RH", "SR") #"TOUT", , 
+
+```
+
+
+## Creamos el modelo Analaisis de discriminantes
+```{r}
+# modelo LDA
+
+lda.model = lda(zona~.,data = datos[c(cols, "zona")])
+
+#output
+
+
+
+lda.model
+```
+
+
+## Predecimos las clases usando el modelo 
+
+```{r}
+predicted = predict(lda.model)
+
+names(predicted)
+
+head(predicted$class)
+head(predicted$posterior)
+head(predicted$x)
+```
+
+## Grafica comparativa entre clases correctas y predichas (entre Cadereyta y Gudalupe)
+
+```{r}
+
+#Creamos un vector con el color corresponidente a cada observacion de acuerdo a la columna Species
+color = c(CA='blue', GA = 'green', SA = 'orange')
+col.ind = color[comp$zona]
+col.ind2= color[predicted$class]
+
+
+#Graficos de dispersion con el color de acuerdo al tipo de especie
+plot(datos[cols], pch=21, bg=col.ind,col= "grey", main= "normal" )
+plot(datos[cols], pch=21, bg=col.ind2,col= "grey", main="predicted")
+```
+## Caluclo de Matriz de confución
+```{r}
+table(pred=predicted$class, true=datos[c(cols, "zona")]$zona)
+# porcentaje de observaciones clasificadas erróneamente
+rate=1-mean(predicted$class==datos[c(cols, "zona")]$zona)
+cat("\n El porcentaje de observaciones clasificadas erróneamente es: ",rate,"%")
+```
+
+
+## Caluclamos exacitud para cada clase
+```{r}
+m = table(pred=predicted$class, true=datos[c(cols, "zona")]$zona)
+m[1]/(m[1]+m[2])
+m[4]/(m[3]+m[4])
+```
+
+
+## Leemos datos
+```{r}
+datos <- read.csv("datosConsolidados.csv")
+head(datos)
+```
+
+## Se separamos las estaciones de Cadereyta y San Pedro
+```{r}
+datos = datos[datos$zona!="GA",]
+datos
+cols = c("NOPPM", "NO2PPM", "NOXPPM", "SO2PPM", "RH", "SR") #"TOUT", , 
+
+```
+
+
+## Se crea el modelo de LDA
+```{r}
+# modelo LDA
+
+lda.model = lda(zona~.,data = datos[c(cols, "zona")])
+
+#output
+
+
+
+lda.model
+```
+
+
+## Se Predicen las clases usando el modelo 
+
+```{r}
+predicted = predict(lda.model)
+
+names(predicted)
+
+head(predicted$class)
+head(predicted$posterior)
+head(predicted$x)
+```
+
+
+## Grafica comparativa entre valores reales con predichos
+```{r}
+
+#Creamos un vector con el color corresponidente a cada observacion de acuerdo a la columna Species
+color = c(CA='blue', GA = 'green', SA = 'orange')
+col.ind = color[comp$zona]
+col.ind2=color[predicted$class]
+
+
+#Graficos de dispersion con el color de acuerdo al tipo de especie
+plot(datos[cols], pch=21, bg=col.ind,col= "grey", main= "normal" )
+plot(datos[cols], pch=21, bg=col.ind2,col= "grey", main="predicted")
+```
+
+
+## Matriz de confución de predicciones hechas
+```{r}
+table(pred=predicted$class, true=datos[c(cols, "zona")]$zona)
+# porcentaje de observaciones clasificadas erróneamente
+rate=1-mean(predicted$class==datos[c(cols, "zona")]$zona)
+cat("\n El porcentaje de observaciones clasificadas erróneamente es: ",rate,"%")
+```
+
+
+## Calculo de exactitud para cada clase
+```{r}
+m = table(pred=predicted$class, true=datos[c(cols, "zona")]$zona)
+m[1]/(m[1]+m[2])
+m[4]/(m[3]+m[4])
+```

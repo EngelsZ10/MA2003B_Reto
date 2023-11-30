@@ -1,0 +1,77 @@
+---
+title: "DiscriminantesReto"
+author: "Engels Emiliano Miranda Palacios A01423398"
+date: "2023-11-23"
+output: html_document
+---
+
+```{r}
+library(MASS)
+library(ggplot2)
+library(MVN)
+```
+
+```{r}
+datos <- read.csv("datosConsolidados.csv")
+head(datos)
+```
+
+```{r}
+datos = datos[datos$zona!="GA",]
+datos
+```
+
+
+```{r}
+cols = c("TOUT", "RH", "SR", "NOPPM", "NO2PPM", "NOXPPM", "SO2PPM")
+color = c(CA='blue', GA = 'green', SA = 'orange')
+col.ind = color[datos$zona]
+plot(datos[cols],pch=21,bg=col.ind, col='gray')
+```
+
+
+
+```{r}
+# modelo LDA
+
+lda.model = lda(zona~.,data = datos[c(cols,"zona")])
+
+#output
+
+lda.model
+```
+
+```{r}
+predicted = predict(lda.model)
+
+names(predicted)
+
+head(predicted$class)
+head(predicted$posterior)
+head(predicted$x)
+```
+
+
+
+```{r}
+ldahist(data=predicted$x[,1], g = datos$zona, type='both', main='Histograma de la función discriminante LD1')
+```
+
+
+```{r}
+
+#Creamos un vector con el color corresponidente a cada observacion de acuerdo a la columna Species
+col.ind2=color[predicted$class]
+
+#Graficos de dispersion con el color de acuerdo al tipo de especie
+plot(datos[cols], pch=21, bg=col.ind,col= "grey", main= "normal" )
+plot(datos[cols], pch=21, bg=col.ind2,col= "grey", main="predicted")
+```
+
+
+```{r}
+table(pred=predicted$class, true=datos$zona)
+# porcentaje de observaciones clasificadas erróneamente
+rate=1-mean(predicted$class==datos$zona)
+cat("\n El porcentaje de observaciones clasificadas erróneamente es: ",rate,"%")
+```
