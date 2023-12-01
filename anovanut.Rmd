@@ -1,0 +1,21 @@
+---
+title: "Prueabas no param"
+author: "Engels Emiliano Miranda Palacios A01423398"
+date: "2023-12-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(FactoMineR)
+library(ggfortify)
+library(factoextra)
+library(scatterplot3d)
+```
+
+```{r}
+datos <- read.csv("dastosConsolidados.CSV")
+```

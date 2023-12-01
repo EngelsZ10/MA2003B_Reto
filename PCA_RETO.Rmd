@@ -1,0 +1,199 @@
+---
+title: "PCA RETO"
+author: "David Vázquez Moreno A01735864"
+date: '2023-11-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Librerías
+
+```{r}
+library(FactoMineR)
+library(ggfortify)
+library(factoextra)
+library(scatterplot3d)
+```
+
+```{r}
+data1 <- read.csv("datospibe.csv")
+data <- read.csv("dastosConsolidados.CSV")
+```
+
+```{r}
+head(data, 10)
+```
+```{r}
+#data_clean <- subset( data, select = -c(X, date, NO, NO2, SO2, NOX, deltaDate, SO2_discret) )
+data_clean<- subset(data, select = -c(X, date, SO2, 
+                             NOX, deltaDate, SO2_discret, 
+                             zona, CA, GA, SA,
+                             NOPPM, NO2PPM, PM2.5) )
+```
+
+```{r}
+head(data_clean, 10)
+```
+```{r}
+
+```
+
+# Comenzar con el PCA
+```{r}
+mty_pca <- princomp(data_clean,
+                   cor = FALSE)
+```
+
+```{r}
+names(mty_pca)
+```
+
+```{r}
+summary(mty_pca)
+```
+
+
+```{r}
+PC <- as.data.frame(mty_pca$x)
+PC
+```
+```{r}
+library(psych)
+R = cor(data_clean)
+K = KMO(R)
+cat("El valor del estadístico es: ", K$MSA)
+```
+
+```{r}
+library(performance)      # Hay que instalar parameters la primera vez que se usa
+check_sphericity_bartlett(data_clean)
+# Para obtener valor del estadístico (chi-cuadrada), del parámetro (grados de libertad) y del valor p):
+b = check_sphericity_bartlett(data_clean)
+b$chisq
+b$p
+b$dof
+```
+
+
+```{r}
+cor(data_clean)
+```
+
+```{r}
+mty_pca$sdev
+```
+
+
+# Número ideal de componentes
+```{r}
+fviz_eig(mty_pca, 
+         ylim = c(0, 70),
+         addlabels  = TRUE,
+         main = "NÚMERO IDEAL DE COMPONENTES",
+         ylab = "Porcentaje de varianza explicada",
+         xlab = "Dimensiones",
+      )
+```
+
+
+
+
+```{r}
+fviz_pca_biplot(mty_pca,
+                label="var",
+                col.var = "red",
+                title = "BIPLOT DE 2 COMPONENTES PRINCIPALES",)
+```
+```{r}
+[mty_pca$loadings[]
+```
+```{r}
+fviz_contrib(mty_pca, choice=("var"), axes=1)
+```
+
+
+```{r}
+fviz_cos2(mty_pca, choice = "var", axes = 3)
+```
+
+
+```{r}
+head(mty_pca$scores, 3)
+```
+```{r}
+compo1 <- mty_pca$scores[, "Comp.1"]
+```
+
+```{r}
+str(compo1)
+```
+
+```{r}
+datos_KW <- data.frame(compo1, data$zona)
+```
+
+```{r}
+head(datos_KW)
+```
+
+```{r}
+colnames(datos_KW) <- c("Componente", "Zona")
+colnames(datos_KW)
+```
+
+```{r}
+datos_KW$Zona <- ordered(datos_KW$Zona,
+                         levels = c("CA", "GA", "SA"))
+
+levels(datos_KW$Zona)
+```
+
+
+# Prueba
+Hipótesis nula     H0: Todas las medianas son iguales
+Hipótesis alterna  H1: Al menos una mediana es diferente
+
+```{r}
+# Hacer el Kruskal-Wallis Test 
+kruskal.test(Componente ~ Zona, data = datos_KW) 
+```
+```{r}
+boxplot(Componente~Zona, data = datos_KW, col = c("#FFE0B2", "#66CDAA", "#66CD00"))
+```
+
+```{r}
+head(datos_KW$Componente)
+```
+
+
+```{r}
+library(dplyr)
+datos_KW %>%
+  group_by(Zona) %>%
+  summarise(
+    count = n(),
+    mean = mean(Componente, na.rm = TRUE),
+    sd = sd(Componente, na.rm = TRUE),
+    median = median(Componente, na.rm = TRUE),
+    IQR = IQR(Componente, na.rm = TRUE)
+  )
+```
+
+```{r}
+library("ggpubr")
+ggline(datos_KW, x = "Zona", y = "Componente", 
+       add = c("mean_se", "jitter"), 
+       order = c("CA", "GA", "SA"),
+       ylab = "PC", xlab = "ZONA")
+```
+
+
+```{r}
+pairwise.wilcox.test(datos_KW$Componente, datos_KW$Zona,
+                 p.adjust.method = "BH")
+```
+
+
