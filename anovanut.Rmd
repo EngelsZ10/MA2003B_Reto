@@ -17,5 +17,166 @@ library(scatterplot3d)
 ```
 
 ```{r}
-datos <- read.csv("dastosConsolidados.CSV")
+data <- read.csv("dastosConsolidadosDrop.csv")
+head(data)
+```
+```{r}
+library(splitstackshape)
+set.seed(11)
+#datos <- stratified(data, "zona", 200)
+datos <- data
+```
+
+
+```{r}
+Zona <- datos$zona
+SO2 <- datos$SO2PPM
+PM <- datos$PM2.5
+RH <- datos$RH
+```
+
+
+
+### SO2
+
+```{r}
+# Hacer el Kruskal-Wallis Test 
+kruskal.test(SO2 ~ Zona, data = datos) 
+```
+```{r}
+boxplot(SO2~Zona, data = datos, col = c("#FFE0B2", "#66CDAA", "#66CD00"))
+```
+
+
+```{r}
+library(dplyr)
+datos_KW = data.frame(SO2, PM, RH, Zona)
+t = datos_KW %>%
+  group_by(Zona) %>%
+  summarise(
+    count = n(),
+    mean = mean(SO2, na.rm = TRUE),
+    sd = sd(SO2, na.rm = TRUE),
+    median = median(SO2, na.rm = TRUE),
+    IQR = IQR(SO2, na.rm = TRUE)
+  )
+t
+```
+```{r}
+t$Zona = c(1,2,3)
+t
+```
+
+```{r}
+
+#plot(mes, precio, type="b", col="orange", main="Precio gasolina con respecto al tiempo")
+barplot(t$mean, names = c("Cadereyta", "Juarez", "Apodaca"), col="orange", main = "Media de Dióxido de Azufre por ciudad")
+```
+
+
+```{r}
+library("ggpubr")
+ggline(datos_KW, x = "Zona", y = "SO2", 
+       add = c("mean_se", "jitter"), 
+       order = c("CA", "GA", "SA"),
+       ylab = "PC", xlab = "ZONA")
+```
+
+
+```{r}
+pairwise.wilcox.test(datos_KW$SO2, datos_KW$Zona,
+                 p.adjust.method = "BH")
+```
+
+## PM 
+
+```{r}
+# Hacer el Kruskal-Wallis Test 
+kruskal.test(PM ~ Zona, data = datos) 
+```
+```{r}
+boxplot(PM~Zona, data = datos, col = c("#FFE0B2", "#66CDAA", "#66CD00"))
+```
+
+
+```{r}
+library(dplyr)
+datos_KW = data.frame(SO2, PM, RH, Zona)
+datos_KW %>%
+  group_by(Zona) %>%
+  summarise(
+    count = n(),
+    mean = mean(PM, na.rm = TRUE),
+    sd = sd(PM, na.rm = TRUE),
+    median = median(PM, na.rm = TRUE),
+    IQR = IQR(PM, na.rm = TRUE)
+  )
+```
+
+```{r}
+
+#plot(mes, precio, type="b", col="orange", main="Precio gasolina con respecto al tiempo")
+barplot(t$mean, names = c("Cadereyta", "Juarez", "Apodaca"), col="blue",  main = "Media de Material particulado por ciudad")
+```
+
+```{r}
+library("ggpubr")
+ggline(datos_KW, x = "Zona", y = "PM", 
+       add = c("mean_se", "jitter"), 
+       order = c("CA", "GA", "SA"),
+       ylab = "PC", xlab = "ZONA")
+```
+
+
+```{r}
+pairwise.wilcox.test(datos_KW$PM, datos_KW$Zona,
+                 p.adjust.method = "BH")
+```
+
+
+## RH
+
+
+```{r}
+# Hacer el Kruskal-Wallis Test 
+kruskal.test(RH ~ Zona, data = datos) 
+```
+```{r}
+boxplot(RH~Zona, data = datos, col = c("#FFE0B2", "#66CDAA", "#66CD00"))
+```
+
+
+```{r}
+library(dplyr)
+datos_KW = data.frame(SO2, PM, RH, Zona)
+datos_KW %>%
+  group_by(Zona) %>%
+  summarise(
+    count = n(),
+    mean = mean(RH, na.rm = TRUE),
+    sd = sd(RH, na.rm = TRUE),
+    median = median(RH, na.rm = TRUE),
+    IQR = IQR(RH, na.rm = TRUE)
+  )
+```
+
+```{r}
+
+#plot(mes, precio, type="b", col="orange", main="Precio gasolina con respecto al tiempo")
+barplot(t$mean, names = c("Cadereyta", "Juarez", "Apodaca"), col="red",  main = "Media de Humedad Relativa por ciudad")
+```
+
+
+```{r}
+library("ggpubr")
+ggline(datos_KW, x = "Zona", y = "RH", 
+       add = c("mean_se", "jitter"), 
+       order = c("CA", "GA", "SA"),
+       ylab = "PC", xlab = "ZONA")
+```
+
+
+```{r}
+pairwise.wilcox.test(datos_KW$RH, datos_KW$Zona,
+                 p.adjust.method = "BH")
 ```
